@@ -27,7 +27,15 @@ SAM_CHECKPOINT = "sam_vit_b_01ec64.pth"
 DEVICE = torch.device('cuda:0')
 MODEL_TYPE = "vit_b"
 sam = sam_model_registry[MODEL_TYPE](checkpoint=SAM_CHECKPOINT).to(device=DEVICE)
-
+mask_generator = SamAutomaticMaskGenerator(
+    model=sam,
+    points_per_side=32,
+    pred_iou_thresh=0.98,
+    stability_score_thresh=0.92,
+    crop_n_layers=1,
+    crop_n_points_downscale_factor=2,
+    min_mask_region_area=100,  # Requires open-cv to run post-processing
+)
 
 def xywh2xyxy(x):
   y = x.copy()
@@ -169,6 +177,7 @@ def main(debug=False):
       img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     else:
       img = cv2.cvtColor(imgff, cv2.COLOR_YUV2BGR_I420)
+    sam_result = mask_generator.generate(img)
     if yolo_c.display:
       cv2.imshow("driver", img)
       cv2.waitKey(1)
