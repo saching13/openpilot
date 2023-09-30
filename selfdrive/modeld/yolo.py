@@ -9,7 +9,7 @@ import json
 import onnx
 from pathlib import Path
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
-
+import supervision as sv
 
 
 os.environ["ZMQ"] = "1"
@@ -37,6 +37,7 @@ mask_generator = SamAutomaticMaskGenerator(
     crop_n_points_downscale_factor=2,
     min_mask_region_area=100,  # Requires open-cv to run post-processing
 )
+mask_annotator = sv.MaskAnnotator()
 
 def xywh2xyxy(x):
   y = x.copy()
@@ -186,7 +187,9 @@ def main(debug=False):
     with torch.no_grad():
       sam_result = mask_generator.generate(img)
     if yolo_c.display:
-      cv2.imshow("driver", img)
+      detections = sv.Detections.from_sam(sam_result=sam_result)
+      annotated_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
+      cv2.imshow("driver", annotated_image)
       cv2.waitKey(1)
     print(f'Image shape -> {img.shape}')
     outputs = yolo_runner.run(img)
