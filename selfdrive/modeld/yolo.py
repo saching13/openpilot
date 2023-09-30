@@ -8,7 +8,11 @@ import argparse
 import json
 import onnx
 from pathlib import Path
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+if False:
+  from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+else:
+  from mobile_sam import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+
 import supervision as sv
 
 
@@ -23,9 +27,14 @@ MODEL_PATHS = {
   ModelRunner.THNEED: Path(__file__).parent / 'models/yolov5n_flat.thneed',
   ModelRunner.ONNX: Path(__file__).parent / 'models/yolov5n_flat.onnx'}
 
-SAM_CHECKPOINT = "sam_vit_b_01ec64.pth"
 DEVICE = torch.device('cuda:0')
-MODEL_TYPE = "vit_b"
+if False:
+  SAM_CHECKPOINT = "sam_vit_b_01ec64.pth"
+  MODEL_TYPE = "vit_b"
+else:
+  SAM_CHECKPOINT = "./weights/mobile_sam.pt"
+  MODEL_TYPE = "vit_t"
+
 sam = sam_model_registry[MODEL_TYPE](checkpoint=SAM_CHECKPOINT).to(device=DEVICE)
 sam = sam.eval()
 mask_generator = SamAutomaticMaskGenerator(
