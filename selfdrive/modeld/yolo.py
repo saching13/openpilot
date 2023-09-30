@@ -148,6 +148,7 @@ class yolo_config():
   clr_out = True
   display = False
   cam = VisionStreamType.VISION_STREAM_DRIVER
+  res_by = 4
   #VisionStreamType.VISION_STREAM_WIDE_ROAD
   #VisionStreamType.VISION_STREAM_ROAD
 
@@ -178,6 +179,10 @@ def main(debug=False):
       img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     else:
       img = cv2.cvtColor(imgff, cv2.COLOR_YUV2BGR_I420)
+    if yolo_c.res_by is not None:
+      new_width = img.shape[1] // yolo_c.res_by
+      new_height = img.shape[0] // yolo_c.res_by
+      img = cv2.resize(img, (new_width, new_height))
     with torch.no_grad():
       sam_result = mask_generator.generate(img)
     if yolo_c.display:
