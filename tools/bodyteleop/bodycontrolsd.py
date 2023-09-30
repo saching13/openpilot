@@ -21,6 +21,8 @@ def send_control_message(pm, x, y, source):
   logger.info(f"bodycontrol|{source} (x, y): ({x}, {y})")
   last_control_send_time = time.monotonic()
 
+lablemap = {0: "straight", 1: "left", 2: "right"}
+commandmap = {0: [-1, 0], 1: [0, 1], 2: [0, -1]}
 
 def main():
   rk = Ratekeeper(20.0)
@@ -35,7 +37,11 @@ def main():
       send_control_message(pm, controls['x'], controls['y'], 'wasd')
     elif sm.updated['customReservedRawData1']:
       # ToDo: do something with the yolo outputs
-      print(sm['customReservedRawData1'].decode())
+      label = sm['customReservedRawData1'].decode()
+      print(f'Command -> {lablemap[label]}')
+      control = commandmap[label]
+      send_control_message(pm, control[0], control[1], 'wasd')
+
     else:
       now = time.monotonic()
       if now > last_control_send_time + TIME_GAP_THRESHOLD:
