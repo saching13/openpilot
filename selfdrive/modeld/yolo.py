@@ -126,14 +126,19 @@ class YoloRunner:
       cv2.putText(img, f"{obj['pred_class']} {obj['prob']:.2f}", pt1, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     return img
 
+class yolo_config():
+  clr_out = True
+  display = False
+  cam = VisionStreamType.VISION_STREAM_DRIVER
+  #VisionStreamType.VISION_STREAM_WIDE_ROAD
+  #VisionStreamType.VISION_STREAM_ROAD
 
 def main(debug=False):
   yolo_runner = YoloRunner()
+  yolo_c = yolo_config()
   pm = messaging.PubMaster(['customReservedRawData1'])
   del os.environ["ZMQ"]
-  vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_DRIVER, True)
-  # vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_WIDE_ROAD, True)
-  # vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_ROAD, True)
+  vipc_client = VisionIpcClient("camerad", yolo_config.cam, True)
 
   while not vipc_client.connect(False):
     time.sleep(0.1)
@@ -150,11 +155,14 @@ def main(debug=False):
     st = time.time()
     imgff = yuv_img_raw.data.reshape(-1, vipc_client.stride)
     imgff = imgff[:vipc_client.height * 3 // 2, :vipc_client.width]
-    img = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-    # img_vis = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
-    # cv2.imshow("driver", img_vis)
-    # cv2.waitkey(1)
+    if yolo_c.clr_out:
+      img = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
+      img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    else:
+      img = cv2.cvtColor(imgff, cv2.COLOR_YUV2BGR_I420)
+    if yolo_c.display:
+      cv2.imshow("driver", img)
+      cv2.waitKey(1)
     print(f'Image shape -> {img.shape}')
     outputs = yolo_runner.run(img)
 
