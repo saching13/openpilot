@@ -11,6 +11,8 @@ last_control_send_time = time.monotonic()
 logger = logging.getLogger("pc")
 logging.basicConfig(level=logging.INFO)
 
+lablemap = {0: "straight", 1: "left", 2: "right"}
+commandmap = {0: [-1, 0], 1: [0, 1], 2: [0, -1]}
 
 def send_control_message(pm, x, y, source):
   global last_control_send_time
@@ -21,10 +23,9 @@ def send_control_message(pm, x, y, source):
   logger.info(f"bodycontrol|{source} (x, y): ({x}, {y})")
   last_control_send_time = time.monotonic()
 
-lablemap = {0: "straight", 1: "left", 2: "right"}
-commandmap = {0: [-1, 0], 1: [0, 1], 2: [0, -1]}
 
 def main():
+  global commandmap, lablemap
   rk = Ratekeeper(20.0)
   pm = messaging.PubMaster(['testJoystick'])
   sm = messaging.SubMaster(['customReservedRawData0', 'customReservedRawData1'])
