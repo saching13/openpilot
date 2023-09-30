@@ -11,8 +11,8 @@ last_control_send_time = time.monotonic()
 logger = logging.getLogger("pc")
 logging.basicConfig(level=logging.INFO)
 
-lablemap = {0: "straight", 1: "left", 2: "right"}
-commandmap = {0: [-1, 0], 1: [0, 1], 2: [0, -1]}
+lablemap = {'0': "straight", '1': "left", '2': "right"}
+commandmap = {'0': [-1, 0], '1': [0, 1], '2': [0, -1]}
 
 def send_control_message(pm, x, y, source):
   global last_control_send_time
