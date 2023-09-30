@@ -14,8 +14,10 @@
 #include "system/loggerd/logger.h"
 
 constexpr int MAIN_FPS = 20;
-const int MAIN_BITRATE = 1e7;
+// const int MAIN_BITRATE = 1e7;
+const int MAIN_BITRATE = 1e6;
 const int LIVESTREAM_BITRATE = 1e6;
+
 const int QCAM_BITRATE = 256000;
 
 #define NO_CAMERA_PATIENCE 500  // fall back to time-based rotation if all cameras are dead
