@@ -2,9 +2,6 @@ import cv2
 import numpy as np
 import glob
 
-import cv2
-import numpy as np
-
 # intrinsic = np.array([[567.0, 0.0, 1928.0 / 2],
 #                       [0.0, 567.0, 1208.0 / 2],
 #                       [0.0, 0.0, 1.0]])
