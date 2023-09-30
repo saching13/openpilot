@@ -1,9 +1,7 @@
-import os
 import glob
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, random_split
 from simplecnn import SimpleCNN
@@ -53,8 +51,15 @@ folders = ["straight", "left", "right"]
 data = []
 labels = []
 for label, folder in enumerate(folders):
-    npy_files = glob.glob(base_dir + folder + "/*.npy")
-    color_imgs = glob.glob(base_dir + folder + "/*.jpg")
+    folderSubs =glob.glob(base_dir + folder + "/*")
+    # classCount = [0, 0, 0]
+    # print(f'Analyzing class {folder}')
+    for subFolder in folderSubs:
+        print(subFolder)
+        npy_files = glob.glob(subFolder + "/*.npy")
+        color_imgs = glob.glob(subFolder + "/*.jpg")
+        npy_files.sort()
+        color_imgs.sort()
     
     for npy_file, clr_file in zip(npy_files, color_imgs):
         mask = np.load(npy_file).astype(np.uint8) # they will be zero and ones
@@ -89,7 +94,7 @@ val_loader = DataLoader(val_dataset, batch_size=32)
 
 
 # Assuming the SimpleCNN model and other training components (criterion, optimizer) are already defined
-num_epochs = 30
+num_epochs = 50
 
 for epoch in range(num_epochs):
     model.train()
