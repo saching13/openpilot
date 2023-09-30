@@ -5,10 +5,26 @@ import glob
 import cv2
 import numpy as np
 
+# intrinsic = np.array([[567.0, 0.0, 1928.0 / 2],
+#                       [0.0, 567.0, 1208.0 / 2],
+#                       [0.0, 0.0, 1.0]])
+
+intrinsic = np.array([[ 5.97615131e+02, -4.50346295e-01,  9.43058151e+02],
+                      [ 0.00000000e+00,  5.97320118e+02,  5.66164841e+02],
+                      [ 0.00000000e+00,  0.00000000e+00,  1.00000000e+00]])
+dist = np.array([-0.03800249,
+                  0.04716124,
+                 -0.04492046,
+                  0.01374281])
+
+new_intrinsic = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(intrinsic, dist, (1928, 1208), np.eye(3), fov_scale=1.5)
+
 def find_vanishing_point(img):
     # Load the image and convert to grayscale
     # img = cv2.imread(img_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if len(img.shape) == 3:
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    else: gray = img.copy()
 
     # Edge detection
     edges = cv2.Canny(gray, 50, 150)
@@ -79,9 +95,10 @@ for image_file in image_files:
 
     # (Optional) Bitwise-AND the mask and original image
     result = cv2.bitwise_and(image, image, mask=mask)
-
+    print(mask.dtype)
+    mask = cv2.fisheye.undistortImage(mask, intrinsic, dist, Knew=new_intrinsic)
     # Show the original image, mask, and result
-    vanishing = find_vanishing_point(result)
+    vanishing = find_vanishing_point(mask.copy())
 
     cv2.imshow('Vanishing', vanishing)
     cv2.imshow('Original Image', image)
