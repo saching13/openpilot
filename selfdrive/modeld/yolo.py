@@ -8,6 +8,9 @@ import argparse
 import json
 import onnx
 from pathlib import Path
+from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+
+
 
 os.environ["ZMQ"] = "1"
 from cereal import messaging
@@ -19,6 +22,12 @@ OUTPUT_SHAPE = (1, 16380, 85)
 MODEL_PATHS = {
   ModelRunner.THNEED: Path(__file__).parent / 'models/yolov5n_flat.thneed',
   ModelRunner.ONNX: Path(__file__).parent / 'models/yolov5n_flat.onnx'}
+
+SAM_CHECKPOINT = "sam_vit_b_01ec64.pth"
+DEVICE = torch.device('cuda:0')
+MODEL_TYPE = "vit_b"
+sam = sam_model_registry[MODEL_TYPE](checkpoint=SAM_CHECKPOINT).to(device=DEVICE)
+
 
 def xywh2xyxy(x):
   y = x.copy()
