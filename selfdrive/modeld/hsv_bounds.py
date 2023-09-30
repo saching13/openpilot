@@ -73,7 +73,24 @@ def find_vanishing_point(img):
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
 
+element = cv2.getStructuringElement(cv2.MORPH_CROSS, (7, 7))
 
+def skeletonize(img):
+    """Compute the skeleton of a binary image using morphological operations."""
+    skel = np.zeros(img.shape, np.uint8)
+    size = np.size(img)
+    
+    done = False
+    while not done:
+        eroded = cv2.erode(img, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(img, temp)
+        skel = cv2.bitwise_or(skel, temp)
+        img = eroded.copy()
+
+        done = (cv2.countNonZero(img) == 0)
+        
+    return skel
 
 
 image_files = glob.glob("dataset" + "/*.jpg")
@@ -84,8 +101,6 @@ for image_file in image_files:
     # Convert the image to HSV format
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Define the lower and upper bounds for the hue, saturation, and value
-    # For example, to detect green color
     # lower_bound = np.array([12, 61,  0])  # Lower bound for green hue
     # upper_bound = np.array([166, 255, 129])  # Upper bound for green hue
     lower_bound = np.array([4, 114,  59])  # Lower bound for green hue
@@ -97,10 +112,12 @@ for image_file in image_files:
     result = cv2.bitwise_and(image, image, mask=mask)
     print(mask.dtype)
     mask = cv2.fisheye.undistortImage(mask, intrinsic, dist, Knew=new_intrinsic)
-    # Show the original image, mask, and result
-    vanishing = find_vanishing_point(mask.copy())
+    mask = cv2.dilate(mask, element)
 
-    cv2.imshow('Vanishing', vanishing)
+    # Show the original image, mask, and result
+    skeleton = skeletonize(mask.copy())
+
+    cv2.imshow('skeleton', skeleton)
     cv2.imshow('Original Image', image)
     cv2.imshow('Mask', mask)
     cv2.imshow('Result', result)

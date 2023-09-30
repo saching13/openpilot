@@ -14,8 +14,8 @@
 #include "system/loggerd/logger.h"
 
 constexpr int MAIN_FPS = 20;
-// const int MAIN_BITRATE = 1e7;
-const int MAIN_BITRATE = 1e6;
+const int MAIN_BITRATE = 1e7;
+// const int MAIN_BITRATE = 1e6;
 const int LIVESTREAM_BITRATE = 1e6;
 
 const int QCAM_BITRATE = 256000;
@@ -60,25 +60,24 @@ public:
 const EncoderInfo main_road_encoder_info = {
   .publish_name = "roadEncodeData",
   .filename = "fcamera.hevc",
-  .frame_width = 640,
-  .frame_height = 480,
+  // .frame_width = 640,
+  // .frame_height = 480,
   INIT_ENCODE_FUNCTIONS(RoadEncode),
 };
 
 const EncoderInfo main_wide_road_encoder_info = {
   .publish_name = "wideRoadEncodeData",
   .filename = "ecamera.hevc",
-  .frame_width = 640,
-  .frame_height = 480,
+  // .frame_width = 640,
+  // .frame_height = 480,
   INIT_ENCODE_FUNCTIONS(WideRoadEncode),
 };
 
 const EncoderInfo main_driver_encoder_info = {
   .publish_name = "driverEncodeData",
   .filename = "dcamera.hevc",
-  .frame_width = 640,
-  .frame_height = 480,
-
+  // .frame_width = 640,
+  // .frame_height = 480,
   .record = Params().getBool("RecordFront"),
   INIT_ENCODE_FUNCTIONS(DriverEncode),
 };
