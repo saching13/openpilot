@@ -117,6 +117,8 @@ class YoloRunner:
 
   def draw_boxes(self, img, objects):
     img = cv2.resize(img, INPUT_SHAPE)
+    
+    print(img.shape)
     for obj in objects:
       pt1 = obj['pt1']
       pt2 = tuple(obj['pt2'])
@@ -130,19 +132,30 @@ def main(debug=False):
   pm = messaging.PubMaster(['customReservedRawData1'])
   del os.environ["ZMQ"]
   vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_DRIVER, True)
+  # vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_WIDE_ROAD, True)
+  # vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_ROAD, True)
 
   while not vipc_client.connect(False):
     time.sleep(0.1)
 
   while True:
     yuv_img_raw = vipc_client.recv()
-    if yuv_img_raw is None or not yuv_img_raw.data.any():
-      continue
+    print('Got image')
 
+    if yuv_img_raw is None:
+      print('its None')
+      continue
+    if not yuv_img_raw.data.any():
+      continue
     st = time.time()
     imgff = yuv_img_raw.data.reshape(-1, vipc_client.stride)
     imgff = imgff[:vipc_client.height * 3 // 2, :vipc_client.width]
-    img = cv2.cvtColor(imgff, cv2.COLOR_YUV2BGR_I420)
+    img = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    # img_vis = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
+    # cv2.imshow("driver", img_vis)
+    # cv2.waitkey(1)
+    print(f'Image shape -> {img.shape}')
     outputs = yolo_runner.run(img)
 
     msg = messaging.new_message()
@@ -151,6 +164,7 @@ def main(debug=False):
     if debug:
       et = time.time()
       cv2.imwrite(str(Path(__file__).parent / 'yolo.jpg'), yolo_runner.draw_boxes(img, outputs))
+      # cv2.imwrite(str(Path(__file__).parent / 'yolo_clr.jpg'), img_vis)
       print(f"eval time: {(et-st)*1000:.2f}ms, found: {','.join([x['pred_class'] for x in outputs])}")
 
 
