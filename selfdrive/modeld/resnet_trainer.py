@@ -1,54 +1,48 @@
-import glob
-
+from torchvision import models
 import torch
-import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader, random_split
-from simplecnn import SimpleCNN, skeletonize
+
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
 import numpy as np
 import cv2
 
+# Define transformations - normalization values are based on pre-trained models from torchvision
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
 
-# def skeletonize(img):
-#     """Compute the skeleton of a binary image using morphological operations."""
-#     skel = np.zeros(img.shape, np.uint8)
-#     size = np.size(img)
-    
-#     done = False
-#     while not done:
-#         eroded = cv2.erode(img, element)
-#         temp = cv2.dilate(eroded, element)
-#         temp = cv2.subtract(img, temp)
-#         skel = cv2.bitwise_or(skel, temp)
-#         img = eroded.copy()
-
-#         done = (cv2.countNonZero(img) == 0)
-        
-#     return skel
-
-
-class NPZDataset(Dataset):
-    def __init__(self, data, labels):
-        self.data = data
+class TransformedDataset(torch.utils.data.Dataset):
+    def __init__(self, original_dataset, labels transform=None):
+        self.dataset = original_dataset
+        self.transform = transform
         self.labels = labels
 
     def __len__(self):
-        return len(self.data)
+        return len(self.original_dataset)
 
     def __getitem__(self, idx):
         image_tensor = torch.from_numpy(self.data[idx]).float()
         image_tensor = image_tensor.permute(2, 0, 1)
-        # print(image_tensor.shape)
+
+        if self.transform:
+            image_tensor = self.transform(image_tensor)
         return image_tensor, self.labels[idx]
 
 
-# Create the model, criterion, and optimizer
-model = SimpleCNN()
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+# Load pre-trained ResNet (e.g., ResNet-50)
+model = models.resnet50(pretrained=True)
 
-base_dir = "dataset_segment_2/"
-folders = ["straight", "left", "right"]
+# Modify the final layer to have 3 classes
+num_ftrs = model.fc.in_features
+model.fc = torch.nn.Linear(num_ftrs, 3)
+
+
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 data = []
 labels = []
@@ -78,29 +72,24 @@ for label, folder in enumerate(folders):
             # cv2.imshow("mask", croped_mask * 255)
             # cv2.imshow('img', im)
             # cv2.waitKey(0)
-            im = im.astype(np.float64)
-            im = im / 255.0
+            # im = im.astype(np.float64)
+            # im = im / 255.0
             # data.append(np.expand_dims(im, axis=0))
             data.append(im)
             labels.append(label)
 
 data = np.array(data)
 labels = np.array(labels)
-print(f'Shape of data is {data.shape}')
-print(f'Shape of data from torch -> {torch.from_numpy(data[1]).shape}')
-print(f'Shape of data from torch -> {torch.from_numpy(data[1]).permute(2, 0, 1).shape}')
-# Splitting data into training and validation sets (80% train, 20% validation)
+
+dataset = TransformedDataset(original_dataset=data, transform=transform)
 train_size = int(0.8 * len(data))
 val_size = len(data) - train_size
-dataset = NPZDataset(data, labels)
-# exit(1)
+
 train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=32)
 
-
-# Assuming the SimpleCNN model and other training components (criterion, optimizer) are already defined
 num_epochs = 50
 
 for epoch in range(num_epochs):
@@ -127,4 +116,4 @@ for epoch in range(num_epochs):
     val_accuracy = 100. * correct / len(val_loader.dataset)
     print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%")
 
-torch.save(model.state_dict(), 'nav_model_hackathon_org_data.pth')
+torch.save(model.state_dict(), 'resnet_hackathon_org_data.pth')
