@@ -71,8 +71,8 @@ for label, folder in enumerate(folders):
             mask_size = mask.shape
 
             offset  = 20
-            croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
-            
+            # croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
+            croped_mask = mask[302 - 170:  mask_size[0], 153 + 20: 153*2 + 20]
             # mask = cv2.dilate(croped_mask, element)
             # sck = skeletonize(croped_mask)
             # cv2.imshow("mask", croped_mask * 255)
