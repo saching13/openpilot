@@ -8,24 +8,23 @@ from simplecnn import SimpleCNN
 import numpy as np
 import cv2
 
-element = cv2.getStructuringElement(cv2.MORPH_CROSS, (7, 7))
 
-def skeletonize(img):
-    """Compute the skeleton of a binary image using morphological operations."""
-    skel = np.zeros(img.shape, np.uint8)
-    size = np.size(img)
+# def skeletonize(img):
+#     """Compute the skeleton of a binary image using morphological operations."""
+#     skel = np.zeros(img.shape, np.uint8)
+#     size = np.size(img)
     
-    done = False
-    while not done:
-        eroded = cv2.erode(img, element)
-        temp = cv2.dilate(eroded, element)
-        temp = cv2.subtract(img, temp)
-        skel = cv2.bitwise_or(skel, temp)
-        img = eroded.copy()
+#     done = False
+#     while not done:
+#         eroded = cv2.erode(img, element)
+#         temp = cv2.dilate(eroded, element)
+#         temp = cv2.subtract(img, temp)
+#         skel = cv2.bitwise_or(skel, temp)
+#         img = eroded.copy()
 
-        done = (cv2.countNonZero(img) == 0)
+#         done = (cv2.countNonZero(img) == 0)
         
-    return skel
+#     return skel
 
 
 class NPZDataset(Dataset):
@@ -61,22 +60,20 @@ for label, folder in enumerate(folders):
         npy_files.sort()
         color_imgs.sort()
     
-    for npy_file, clr_file in zip(npy_files, color_imgs):
-        mask = np.load(npy_file).astype(np.uint8) # they will be zero and ones
-        im = cv2.imread(clr_file)
-        
-        rgb_size = im.shape
-        mask_size = mask.shape
+        for npy_file, clr_file in zip(npy_files, color_imgs):
+            mask = np.load(npy_file).astype(np.uint8) # they will be zero and ones
+            im = cv2.imread(clr_file)
+            
+            rgb_size = im.shape
+            mask_size = mask.shape
 
-        offset  = 20
-        croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
-        
-        mask = cv2.dilate(croped_mask, element)
-        # sck = skeletonize(mask)
-        # sck = cv2.dilate(sck, element)
-
-        data.append(np.expand_dims(mask, axis=0))
-        labels.append(label)
+            offset  = 20
+            croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
+            
+            # mask = cv2.dilate(croped_mask, element)
+            
+            data.append(np.expand_dims(mask, axis=0))
+            labels.append(label)
 
 data = np.array(data)
 labels = np.array(labels)
