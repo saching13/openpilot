@@ -14,7 +14,7 @@ class SimpleCNN(nn.Module):
 
         # Fully connected layers
         self.fc1 = nn.Linear(64 * 21 * 19, 512)  # After 3 pooling layers, the size is 170/8 x 153/8
-        self.fc2 = nn.Linear(512, 3)  # 3 classification outputs
+        self.fc2 = nn.Linear(512, 3)
 
 
     def forward(self, x):
