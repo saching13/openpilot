@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, random_split
-from simplecnn import SimpleCNN
+from simplecnn import SimpleCNN, skeletonize
 import numpy as np
 import cv2
 
@@ -71,8 +71,8 @@ for label, folder in enumerate(folders):
             croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
             
             # mask = cv2.dilate(croped_mask, element)
-            
-            data.append(np.expand_dims(mask, axis=0))
+            # sck = skeletonize(croped_mask)
+            data.append(np.expand_dims(croped_mask, axis=0))
             labels.append(label)
 
 data = np.array(data)
