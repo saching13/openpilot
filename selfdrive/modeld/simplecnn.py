@@ -6,6 +6,23 @@ import cv2
 
 element = cv2.getStructuringElement(cv2.MORPH_CROSS, (7, 7))
 
+def skeletonize(img):
+    """Compute the skeleton of a binary image using morphological operations."""
+    skel = np.zeros(img.shape, np.uint8)
+    size = np.size(img)
+    img = cv2.dilate(img, element)
+    done = False
+    while not done:
+        eroded = cv2.erode(img, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(img, temp)
+        skel = cv2.bitwise_or(skel, temp)
+        img = eroded.copy()
+
+        done = (cv2.countNonZero(img) == 0)
+        sck = cv2.dilate(sck, element)
+    return skel
+
 class SimpleCNN(nn.Module):
     def __init__(self):
         super(SimpleCNN, self).__init__()
@@ -20,25 +37,9 @@ class SimpleCNN(nn.Module):
         self.fc1 = nn.Linear(64 * 21 * 19, 512)  # After 3 pooling layers, the size is 170/8 x 153/8
         self.fc2 = nn.Linear(512, 3)
 
-    def skeletonize(self, img):
-        """Compute the skeleton of a binary image using morphological operations."""
-        skel = np.zeros(img.shape, np.uint8)
-        size = np.size(img)
-        img = cv2.dilate(img, element)
-        done = False
-        while not done:
-            eroded = cv2.erode(img, element)
-            temp = cv2.dilate(eroded, element)
-            temp = cv2.subtract(img, temp)
-            skel = cv2.bitwise_or(skel, temp)
-            img = eroded.copy()
 
-            done = (cv2.countNonZero(img) == 0)
-            sck = cv2.dilate(sck, element)
-        return skel
 
     def forward(self, x):
-        x = self.skeletonize(x)
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = self.pool(F.relu(self.conv3(x)))
