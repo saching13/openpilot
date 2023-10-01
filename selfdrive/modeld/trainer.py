@@ -37,7 +37,7 @@ class NPZDataset(Dataset):
 
     def __getitem__(self, idx):
         image_tensor = torch.from_numpy(self.data[idx]).float()
-        image_tensor = image_tensor.permute(2, 0, 1)
+        # image_tensor = image_tensor.permute(2, 0, 1)
         # print(image_tensor.shape)
         return image_tensor, self.labels[idx]
 
@@ -47,7 +47,7 @@ model = SimpleCNN()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-base_dir = "dataset_segment_2/"
+base_dir = "dataset_segment/"
 folders = ["straight", "left", "right"]
 
 data = []
@@ -78,17 +78,17 @@ for label, folder in enumerate(folders):
             # cv2.imshow("mask", croped_mask * 255)
             # cv2.imshow('img', im)
             # cv2.waitKey(0)
-            im = im.astype(np.float64)
-            im = im / 255.0
-            # data.append(np.expand_dims(im, axis=0))
-            data.append(im)
+            # im = im.astype(np.float64)
+            # im = im / 255.0
+            data.append(np.expand_dims(croped_mask, axis=0))
+            # data.append(im)
             labels.append(label)
 
 data = np.array(data)
 labels = np.array(labels)
 print(f'Shape of data is {data.shape}')
-print(f'Shape of data from torch -> {torch.from_numpy(data[1]).shape}')
-print(f'Shape of data from torch -> {torch.from_numpy(data[1]).permute(2, 0, 1).shape}')
+# print(f'Shape of data from torch -> {torch.from_numpy(data[1]).shape}')
+# print(f'Shape of data from torch -> {torch.from_numpy(data[1]).permute(2, 0, 1).shape}')
 # Splitting data into training and validation sets (80% train, 20% validation)
 train_size = int(0.8 * len(data))
 val_size = len(data) - train_size
