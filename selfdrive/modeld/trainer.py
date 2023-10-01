@@ -72,10 +72,10 @@ for label, folder in enumerate(folders):
         croped_mask = mask[mask_size[0] - rgb_size[0]: mask_size[0], rgb_size[1] + offset: rgb_size[1]*2 + offset]
         
         mask = cv2.dilate(croped_mask, element)
-        sck = skeletonize(mask)
-        sck = cv2.dilate(sck, element)
+        # sck = skeletonize(mask)
+        # sck = cv2.dilate(sck, element)
 
-        data.append(np.expand_dims(sck, axis=0))
+        data.append(np.expand_dims(mask, axis=0))
         labels.append(label)
 
 data = np.array(data)
