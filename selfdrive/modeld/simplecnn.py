@@ -20,7 +20,7 @@ def skeletonize(img):
         img = eroded.copy()
 
         done = (cv2.countNonZero(img) == 0)
-        sck = cv2.dilate(sck, element)
+        skel = cv2.dilate(skel, element)
     return skel
 
 class SimpleCNN(nn.Module):
