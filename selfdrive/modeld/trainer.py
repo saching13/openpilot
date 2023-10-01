@@ -77,7 +77,7 @@ for label, folder in enumerate(folders):
 
 data = np.array(data)
 labels = np.array(labels)
-# print(f'Shape of data is {data.shape}')
+print(f'Shape of data is {data.shape}')
 # print(f'Shape of data from torch -> {torch.from_numpy(data[1]).shape}')
 # Splitting data into training and validation sets (80% train, 20% validation)
 train_size = int(0.8 * len(data))
